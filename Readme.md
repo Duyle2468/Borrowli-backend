@@ -1,134 +1,130 @@
-# Giới thiệu về API
+# API Introduction
 
-Đây là backend API cho dự án Order món ă
+This is the backend API for the **Order Food** project.
 
-- Authentication: Login, Register, Logout
-- Account: Get thông tin cá nhân, Cập nhật thông tin cá nhân
-- Dish: Đọc, Thêm, Sửa, Xóa món ăn
-- Media: Upload hình ảnh
-- Test API
+- **Authentication**: Login, Register, Logout
+- **Account**: Get personal information, Update personal information
+- **Dish**: Read, Add, Edit, Delete a dish
+- **Media**: Upload images
+- **Test API**
 
-> Lưu ý quan trọng: thỉnh thoảng nên pull code mới từ github repo của mình về, vì đôi khi mình có cập nhật logic API trong quá trình mình quay video
+> **Important note**: Occasionally, pull the latest code from my GitHub repo as I might update the API logic while recording videos.
 
-> Trong file `server/.env` có thuộc tính `COOKIE_MODE`, hãy set `true` nếu bạn muốn dùng cookie cho việc authentication ở server
+> In the `server/.env` file, there's a `COOKIE_MODE` property. Set it to `true` if you want to use cookies for server-side authentication.
 
-## Công nghệ sử dụng
+## Technologies Used
 
-Node.js + Fastify + Sqlite
+- Node.js
+- Fastify
+- Sqlite
 
-## Cài đặt
+## Setup
 
-Chỉ cần clone repository này về máy, cd vào thư mục, cài đặt các packages và chạy lệnh `npm run dev` là được
+Simply clone this repository, navigate to the folder, install the packages, and run the command:
 
 ```bash
 cd server
 npm i
 npm run dev
-```
+If you want to run the production version, use the following commands:
 
-Trong trường hợp muốn chạy dishion, chạy lệnh
-
-```bash
+bash
+Copy code
 npm run build
 npm run start
-```
+To view the database, open Prisma Studio using the command:
 
-Muốn xem thông tin database, chỉ cần mở Prisma Studio lên bằng câu lệnh
-
-```bash
+bash
+Copy code
 npx prisma studio
+It will run at http://localhost:5555.
 ```
 
-Nó sẽ chạy ở url [http://localhost:5555](http://localhost:5555)
+The source code includes a .env file for configuration. You can change the backend API port in this file, with the default set to port 4000.
 
-Trong source code có chứa file `.env` để config, trong file này bạn có thể đổi port cho API backend, mặc định là port `4000`
+When you upload images, they will be stored in the /uploads directory within the server folder.
 
-Khi upload thì hình ảnh sẽ được đi vào thư mục `/uploads` trong folder `server`
+Response Format
+Responses are returned in JSON format and always include a message field. Additionally, there may be data or errors fields.
 
-## Format response trả về
-
-Định dạng trả về là JSON, và luôn có trường `message`, ngoài ra có thể sẽ có trường `data` hoặc `errors`
-
-Đây là ví dụ về response trả về khi thành công
-
-```json
+Successful Response Example
+json
+Copy code
 {
-  "data": {
-    "id": 2,
-    "name": "Iphone 11",
-    "price": 20000000,
-    "description": "Mô tả cho iphone 11",
-    "image": "http://localhost:4000/static/bec024f9ea534b7fbf078cb5462b30aa.jpg",
-    "createdAt": "2024-03-11T03:51:14.028Z",
-    "updatedAt": "2024-03-11T03:51:14.028Z"
-  },
-  "message": "Tạo sản phẩm thành công!"
+"data": {
+"id": 2,
+"name": "Iphone 11",
+"price": 20000000,
+"description": "Description for iPhone 11",
+"image": "http://localhost:4000/static/bec024f9ea534b7fbf078cb5462b30aa.jpg",
+"createdAt": "2024-03-11T03:51:14.028Z",
+"updatedAt": "2024-03-11T03:51:14.028Z"
+},
+"message": "Product created successfully!"
 }
-```
+Error Response Example
+If the request body is incorrectly formatted, the server will return a 422 error.
 
-Trong trường hợp lỗi thì nếu lỗi liên quan đến việc body gửi lên không đúng định dạng thì server sẽ trả về lỗi `422` và thông tin lỗi như sau
+For example, if the price field is missing from the request body:
 
-Ví dụ dưới đây body thiếu trường `price`
-
-```json
+json
+Copy code
 {
-  "message": "A validation error occurred when validating the body...",
-  "errors": [
-    {
-      "code": "invalid_type",
-      "expected": "number",
-      "received": "undefined",
-      "path": ["price"],
-      "message": "Required",
-      "field": "price"
-    }
-  ],
-  "code": "FST_ERR_VALIDATION",
-  "statusCode": 422
-}
-```
-
-Trong trường hợp lỗi khác, server sẽ trả về lỗi trong trường `message`, ví dụ
-
-```json
+"message": "A validation error occurred when validating the body...",
+"errors": [
 {
-  "message": "Không tìm thấy dữ liệu!",
-  "statusCode": 404
+"code": "invalid_type",
+"expected": "number",
+"received": "undefined",
+"path": ["price"],
+"message": "Required",
+"field": "price"
 }
+],
+"code": "FST_ERR_VALIDATION",
+"statusCode": 422
+}
+For other errors, the server will return the error in the message field, like:
+
+json
+Copy code
+{
+"message": "Data not found!",
+"statusCode": 404
+}
+API Details
+The API runs by default at http://localhost:4000. If you want to change the port, you can do so in the .env file.
+
+For most POST, PUT requests, the body must be in JSON format, and the Content-Type: application/json header must be included.
+
+For image uploads, the request should be in form-data format.
+
+User authentication for APIs is done through session tokens. These session tokens are JWTs, and the JWT secret key is stored in the .env file and used to create and verify tokens.
+
+For APIs that require user authentication, such as the Account API group, you need to send the accessToken to the server through the Authorization: "Bearer <accessToken>" header.
+
+Test API: To check if the API is working
+GET /test: Returns a message confirming the API is working.
+Real-time API
+POST /guest/orders: Create a new order.
+Quick Postman Setup
+Currently, there's no Postman collection file available, but I will update it after finishing the course.
+
+I have saved a file called NextJs Free API.postman_collection.json in the server folder. You can import this file into Postman to get my collection. Then, create a new environment, set the host variable to http://localhost:4000, and select this environment when calling the API.
+
+Default Accounts
+Admin account: admin@order.com | 123456
+User accounts:
+
+phuminhdat@gmail.com | 123123
+buianhson@gmail.com | 123123
+ngocbichhuynh@gmail.com | 123123
+binhnguyen@gmail.com | 123123
+go
+Copy code
+
+You can now copy the whole block and paste it directly into your `readme.md`.
+
 ```
 
-## Chi tiết các API
-
-Mặc định API sẽ chạy ở địa chỉ [http://localhost:4000](http://localhost:4000), các bạn nào muốn đổi port thì vào file `.env` để thay đổi port
-
-Với các API POST, PUT thông thường thì body gửi lên phải là JSON, và phải có header `Content-Type: application/json`.
-
-Đặc biệt API upload hình ảnh thì phải gửi dưới dạng `form-data`
-
-API xác thực người dùng thông qua session token, session token này là một JWT, secret key JWT này sẽ được lưu trong file `.env` và được sử dụng để tạo và verify token
-
-Đối với các API cần xác thực người dùng như bên cụm API về `Account` thì bạn cần gửi accessToken lên server thông qua header `Authorization: "Bearer <accessToken>"`
-
-### Test API: muốn biết api có hoạt động không
-
-- `GET /test`: Trả về message nghĩa là API hoạt động
-
-### Các API cần realtime
-
-- `POST /guest/orders`: Tạo order mới
-
-## Setup nhanh postman
-
-> Hiện tại thì chưa có file collection Postman, khi nào mình quay xong khóa học mình sẽ update lên nhé
-
-Mình có lưu 1 file là `NextJs Free API.postman_collection.json` trong thư mục `server`, các bạn chỉ cần import file này vào Postman là có ngay collection của mình. Tiếp theo các bạn tạo 1 environment mới, và set biến `host` là `http://localhost:4000`, và chọn environment này khi gọi API là xong.
-
-## Tài khoản mặc định
-
-Tài khoản admin: admin@order.com | 123456
-Tài khoản user:
-
-- phuminhdat@gmail.com | 123123
-- buianhson@gmail.com | 123123
-- ngocbichhuynh@gmail.com | 123123
-- binhnguyen@gmail.com | 123123
+```
